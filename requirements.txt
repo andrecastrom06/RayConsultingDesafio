@@ -1,4 +1,2 @@
 google-api-python-client
-dash
-plotly
-pandas
+matplotlib
