@@ -30,11 +30,18 @@ def getDados(clienteAPI, idVideos):
         return []
     
 def main():
+    print("\n")
     videos = getVideos(clienteAPI, idPlaylist) #chama getVideos
     idVideos = [video['contentDetails']['videoId'] for video in videos] #percorre video por video e salva em idVideos
     dadosVideos = getDados(clienteAPI, idVideos) #chama getDados
-    ordemVideos = sorted(dadosVideos, key=lambda x: int(x['statistics']['viewCount']), reverse=False) #ordena os videos em ordem crescente de visualização
+    ordemVideos = sorted(dadosVideos, key=lambda x: int(x['statistics']['viewCount']), reverse=True) #ordena os videos em ordem crescente de visualização
     for indice, video in enumerate(ordemVideos, start=1): #estrutura que se repete ate armazenar e printar no console todos os videos
         tituloVideo = video['snippet']['title'] #armazena titulo do video
         visualizacoes = video['statistics']['viewCount'] #armazena numero de visualizações do video
-        print(f"{indice}. Título: {tituloVideo} - Visualizações: {visualizacoes}") #printa no console
+        curtidas = video['statistics']['likeCount']
+        comentarios = video['statistics']['commentCount']
+        print(f"{indice}. Título: {tituloVideo}\nVisualizações: {visualizacoes}\nCurtidas: {curtidas}\nComentários: {comentarios}") #printa no console
+        print("\n\n")
+
+if __name__ == "__main__":
+    main()
