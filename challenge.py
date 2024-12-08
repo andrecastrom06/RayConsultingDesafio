@@ -1,5 +1,6 @@
 from googleapiclient.discovery import build
 import matplotlib.pyplot as plt
+from matplotlib.widgets import CheckButtons
 
 idAPI = "AIzaSyA9oZQetlGjiN2Ve5c8-3Rg0vBbhTd1dgY"  # id da API
 idPlaylist = "PLfoNZDHitwjUv0pjTwlV1vzaE0r7UDVDR"  # id da playlist que será utilizada
@@ -7,10 +8,10 @@ clienteAPI = build('youtube', 'v3', developerKey=idAPI)  # autenticação e espe
 
 def getVideos(clienteAPI, idPlaylist, maxResultados=24):
     try:
-        requestVideos = clienteAPI.playlistItems().list( #pede uma lista com o conteudo da playlist
-            part = "snippet,contentDetails", #guarda em part os detalhes relevantes dos videos
-            playlistId = idPlaylist, #guarda a id da playlist
-            maxResults = maxResultados #guarda em maxResults o número máximo de resultados que podem ser achados (24)
+        requestVideos = clienteAPI.playlistItems().list(  # pede uma lista com o conteúdo da playlist
+            part="snippet,contentDetails",  # guarda em 'part' os detalhes relevantes dos vídeos
+            playlistId=idPlaylist,  # guarda a id da playlist
+            maxResults=maxResultados  # define o número máximo de resultados
         )
         responseVideos = requestVideos.execute()  # executa o que foi solicitado
         return responseVideos['items']  # retorna somente a lista dos vídeos que foram solicitados
@@ -21,8 +22,8 @@ def getVideos(clienteAPI, idPlaylist, maxResultados=24):
 def getDados(clienteAPI, idVideos):
     try:
         requestDetalhesVideos = clienteAPI.videos().list(  # pede uma lista com detalhes de cada vídeo
-            part = "snippet,statistics",  # guarda em 'part' os detalhes relevantes de cada vídeo
-            id = ",".join(idVideos)  # passa os ids para 'id' e os separa por vírgula
+            part="snippet,statistics",  # guarda em 'part' os detalhes relevantes de cada vídeo
+            id=",".join(idVideos)  # passa os ids para 'id' e os separa por vírgula
         )
         responseDetalhesVideos = requestDetalhesVideos.execute()
         return responseDetalhesVideos['items']  # retorna somente a lista dos dados dos vídeos
@@ -57,33 +58,47 @@ def main():
         print(f"{indice}. Título: {titulo}\nVisualizações: {visualizacoes}\nCurtidas: {curtidas}\nComentários: {comentarios}")  # Print no console
         print("\n\n")
     
-    plt.figure(figsize=(14, 8)) # Criando o gráfico de barras
-    
+    fig, ax = plt.subplots(figsize=(14, 8))  # Criando o gráfico de barras
     x = range(len(tituloVideo))  # Posições para o título dos vídeos no gráfico
     
-    # Populando as barras para visualizações, curtidas e comentários
-    plt.bar(x, visualizacoesVideo, width=0.2, label="Visualizações", align="center")
-    plt.bar(x, curtidasVideo, width=0.2, label="Curtidas", align="edge")
-    plt.bar(x, comentariosVideo, width=0.2, label="Comentários", align="edge")
+    # Função para atualizar o gráfico com base nas seleções
+    def selecionarGrafico(label):
+        ax.clear()  # Limpa o gráfico atual
+        
+        if 'Visualizações' in label:
+            ax.bar(x, visualizacoesVideo, width=0.2, label="Visualizações", align="center")
+        if 'Curtidas' in label:
+            ax.bar(x, curtidasVideo, width=0.2, label="Curtidas", align="center")
+        if 'Comentários' in label:
+            ax.bar(x, comentariosVideo, width=0.2, label="Comentários", align="center")
 
-    # Adicionando título e rótulos
-    plt.xlabel("Vídeos", fontsize=14)
-    plt.ylabel("Contagem", fontsize=14)
-    plt.title("Comparação de Visualizações, Curtidas e Comentários por Vídeo", fontsize=16)
+        # Adicionando título e rótulos
+        ax.set_title("Desafio Ray Consulting, consumo de API para dados de F1", fontsize=16)
+        ax.set_xticks(x)
+        ax.set_xticklabels(tituloVideo, rotation=90, fontsize=10)
+        ax.legend(fontsize=12)
+        ax.grid(True, axis='y', linestyle='--', alpha=0.7)
+        
+        # Exibindo o gráfico
+        fig.tight_layout()
+        plt.draw()
+
+    # Adicionando os checkboxes para selecionar quais dados visualizar
+    ax_check = plt.axes([0.02, 0.25, 0.18, 0.5], frameon=False)  # Posicionando os checkboxes à esquerda
+    check = CheckButtons(ax_check, ['Visualizações', 'Curtidas', 'Comentários'], [True, True, True])  # Inicializa todos como True
     
-    # Definindo os rótulos do eixo X
-    plt.xticks(x, tituloVideo, rotation=90, fontsize=10)
+    # Aumentando o tamanho da fonte dos CheckButtons
+    for label in check.labels:
+        label.set_fontsize(8)  # Aumenta o tamanho da fonte para tornar os botões mais visíveis
+        label.set_fontweight('bold')  # Deixa o texto mais destacado
+
+    # Ajustando a posição dos checkbuttons para ficarem mais visíveis à esquerda
+    ax_check.set_position([0, 0.1, 0.05, 0.3])  # Posição dos checkbuttons para alinhamento à esquerda com mais espaço para a palavra
     
-    # Adicionando uma legenda
-    plt.legend(fontsize=12)
+    check.on_clicked(selecionarGrafico)  # Atualiza o gráfico conforme a seleção
     
-    # Adicionando o grid para facilitar a leitura dos valores
-    plt.grid(True, axis='y', linestyle='--', alpha=0.7)
-    
-    # Ajustando o layout para não cortar rótulos
-    plt.tight_layout()
-    
-    # Exibindo o gráfico
+    # Exibindo o gráfico interativo
+    selecionarGrafico(['Visualizações', 'Curtidas', 'Comentários'])
     plt.show()
 
 if __name__ == "__main__":  # Garante a execução de maneira correta
