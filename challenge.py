@@ -43,6 +43,7 @@ def main():
     curtidasVideo = []
     comentariosVideo = []
     
+    print("\n")
     for indice, video in enumerate(ordemVideos, start=1):  # estrutura que se repete até armazenar todos os vídeos
         titulo = video['snippet']['title']  # armazena título do vídeo
         visualizacoes = video['statistics']['viewCount']  # armazena número de visualizações
@@ -54,6 +55,8 @@ def main():
         visualizacoesVideo.append(int(visualizacoes))  # Converte para inteiro
         curtidasVideo.append(int(curtidas))  # Converte para inteiro
         comentariosVideo.append(int(comentarios))  # Converte para inteiro
+
+        print(f"{indice}. Título: {titulo}\nVisualizações: {visualizacoes}\nCurtidas:{curtidas}\nComentários: {comentarios}\n\n")
     
     fig, eixo = plt.subplots(figsize=(14, 8))  # Criando o gráfico de barras
     x = range(len(tituloVideo))  # Posições para o título dos vídeos no gráfico
